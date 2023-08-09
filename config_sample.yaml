@@ -2,14 +2,23 @@ App:
   RunLevel: debug
 #  RunLevel: release
 
+  Origin: localhost:8080
+  CaptchaWidth: 240
+  CaptchaHeight: 80
+  CookieExpire: 3600 #s
+
+
 WebServer:
   Port: 8080
   WriteTimeout: 10 #ms
   ReadTimeout: 10 #ms
+  AllowOrigins:
+    - http://localhost:8080
+    - http://localhost:8081
 
 Database:
-  Host: localhost
-  Port: 3306
-  User: root
-  Pwd: 123456
-  DBName: go_svc_tpl
+  DSN: root:password@tcp(localhost:3306)/short_link?charset=utf8mb4&parseTime=True&loc=Local
+
+Test:
+  TestDB: root:password@tcp(localhost:3306)/short_link?charset=utf8mb4&parseTime=True&loc=Local
+
