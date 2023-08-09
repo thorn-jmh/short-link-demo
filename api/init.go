@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go-svc-tpl/api/route"
@@ -9,18 +10,11 @@ import (
 	"time"
 )
 
-//go:generate go run -mod=mod github.com/swaggo/swag/cmd/swag fmt -d ../ -g api/init.go
-//go:generate go run -mod=mod github.com/swaggo/swag/cmd/swag init -d ../ -g api/init.go --ot yaml -o ../docs
-
-//	@title			go-svc-tpl API
-//	@version		0.0.1
-//	@description	A simple go service template, which is used to build a go service quickly.
-//	@BasePath		/api
-
 type WebServerCfg struct {
-	Port         int `mapstructure:"Port"`
-	WriteTimeout int `mapstructure:"WriteTimeout"`
-	ReadTimeout  int `mapstructure:"ReadTimeout"`
+	Port         int      `mapstructure:"Port"`
+	WriteTimeout int      `mapstructure:"WriteTimeout"`
+	ReadTimeout  int      `mapstructure:"ReadTimeout"`
+	AllowOrigins []string `mapstructure:"AllowOrigins"`
 }
 
 func StartServer() error {
@@ -30,8 +24,19 @@ func StartServer() error {
 	}
 
 	e := gin.Default()
-	route.SetupRouter(e.Group("/api"))
+	e.Use(cors.New(cors.Config{
+		AllowOrigins:     cfg.AllowOrigins,
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Content-Length"},
+		AllowCredentials: true,
+	}))
+	route.SetupRouter(e.Group("/"))
 
+	if viper.GetString("App.RunLevel") == "debug" {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	s := &http.Server{
 		Addr:           fmt.Sprintf(":%d", cfg.Port),
 		Handler:        e,

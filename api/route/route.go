@@ -15,6 +15,9 @@ func Ping(c *gin.Context) {
 }
 
 func SetupRouter(r *gin.RouterGroup) {
-	r.GET("/ping", Ping)
-	setupFooController(r)
+	api := r.Group("/api")
+	api.GET("/ping", Ping)
+	setupServerController(r)
+	setupLinkController(api)
+	setupUserController(api)
 }
